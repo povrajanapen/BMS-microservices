@@ -17,10 +17,12 @@ export default function LoginPage() {
   const [email, setEmail] = useState("demo@example.com")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError(null)
 
     try {
       const res = await fetch(`${AUTH_BASE_URL}/auth/login`, {
@@ -34,7 +36,19 @@ export default function LoginPage() {
       const data = await res.json()
 
       if (!res.ok) {
-        throw new Error(data?.message || "Login failed")
+        if (res.status === 401) {
+          setError("Incorrect email or password. Please try again.")
+        } else {
+          setError(data?.message || "Unable to login. Please try again.")
+        }
+
+        toast({
+          title: "Login failed",
+          description: data?.message ||
+            (res.status === 401 ? "Incorrect email or password" : "Unable to login"),
+          variant: "destructive",
+        })
+        return
       }
 
       if (typeof window !== "undefined") {
@@ -49,6 +63,7 @@ export default function LoginPage() {
 
       router.push("/")
     } catch (err: any) {
+      setError("Something went wrong while logging in. Please try again.")
       toast({
         title: "Login failed",
         description: err.message || "Unable to login",
@@ -104,6 +119,11 @@ export default function LoginPage() {
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Logging in..." : "Login"}
           </Button>
+          {error ? (
+            <p className="text-sm text-destructive" role="alert">
+              {error}
+            </p>
+          ) : null}
         </form>
 
       </div>

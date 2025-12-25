@@ -18,10 +18,12 @@ export default function SignupPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError(null)
 
     try {
       const res = await fetch(`${AUTH_BASE_URL}/auth/register`, {
@@ -35,7 +37,26 @@ export default function SignupPage() {
       const data = await res.json()
 
       if (!res.ok) {
-        throw new Error(data?.message || "Sign up failed")
+        if (res.status === 409) {
+          setError("An account with this email already exists. Try logging in instead.")
+        } else if (res.status === 400) {
+          setError("Please fill in all fields correctly and try again.")
+        } else {
+          setError(data?.message || "Unable to create account. Please try again.")
+        }
+
+        toast({
+          title: "Sign up failed",
+          description:
+            data?.message ||
+            (res.status === 409
+              ? "Email already registered"
+              : res.status === 400
+                ? "Invalid sign up details"
+                : "Unable to create account"),
+          variant: "destructive",
+        })
+        return
       }
 
       if (typeof window !== "undefined") {
@@ -50,6 +71,7 @@ export default function SignupPage() {
 
       router.push("/")
     } catch (err: any) {
+      setError("Something went wrong while creating your account. Please try again.")
       toast({
         title: "Sign up failed",
         description: err.message || "Unable to create account",
@@ -118,6 +140,11 @@ export default function SignupPage() {
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Signing up..." : "Sign up"}
           </Button>
+          {error ? (
+            <p className="text-sm text-destructive" role="alert">
+              {error}
+            </p>
+          ) : null}
         </form>
       </div>
     </main>
