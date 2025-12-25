@@ -46,7 +46,7 @@ export default function Home() {
       <section className="border-b border-border px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="space-y-4 text-center">
-            <h2 className="text-4xl font-bold text-foreground text-balance">Microservices Management</h2>
+            <h2 className="text-4xl font-bold text-foreground text-balance">Book Management System</h2>
             <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
               Manage your book store inventory, customers, and orders with our modern, intuitive dashboard
             </p>
